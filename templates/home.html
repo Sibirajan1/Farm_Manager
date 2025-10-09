@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Floating background shapes -->
+<div class="floating-shape shape-1"></div>
+<div class="floating-shape shape-2"></div>
+<div class="floating-shape shape-3"></div>
+
+<div class="container">
+  <div class="content">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1>🌾 Farm Manager Dashboard</h1>
+      <p>Your comprehensive agricultural management system for modern farming operations</p>
+    </div>
+
+    <!-- Main Action Cards -->
+    <div class="main-actions">
+      <!-- Notes Card -->
+      <div class="action-card">
+        <h3>📝 Farm Notes</h3>
+        <p>Record important farming activities, crop observations, and field notes</p>
+        <a href="{{ url_for('notes') }}" class="btn btn-primary">
+          <span class="btn-icon">📝</span>
+          View Notes
+        </a>
+      </div>
+
+      <!-- Reminders Card -->
+      <div class="action-card">
+        <h3>⏰ Set Reminders</h3>
+        <p>Schedule alerts for planting, watering, harvesting, and other farm activities</p>
+        <a href="{{ url_for('set_reminder') }}" class="btn btn-warning">
+          <span class="btn-icon">⏰</span>
+          Set Reminder
+        </a>
+      </div>
+
+      <!-- Notifications Card -->
+      <div class="action-card">
+        <h3>🔔 Notifications</h3>
+        <p>View all your farming alerts, weather updates, and scheduled reminders</p>
+        <a href="{{ url_for('notifications_page') }}" class="btn btn-info">
+          <span class="btn-icon">🔔</span>
+          View Notifications
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="hero-section" style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(52, 152, 219, 0.1));">
+      <h2 style="font-size: 1.8em; margin-bottom: 25px; border: none; padding: 0;">🚀 Quick Actions</h2>
+      
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="showComingSoon('Weather')">
+          <span class="btn-icon">🌤️</span>
+          Weather Forecast
+        </button>
+        
+        <button class="btn btn-purple" onclick="showComingSoon('Crop Calendar')">
+          <span class="btn-icon">📅</span>
+          Crop Calendar
+        </button>
+        
+        <button class="btn btn-info" onclick="showComingSoon('Expense Tracker')">
+          <span class="btn-icon">💰</span>
+          Track Expenses
+        </button>
+        
+        <button class="btn btn-warning" onclick="showComingSoon('Field Map')">
+          <span class="btn-icon">🗺️</span>
+          Field Mapping
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="nav-section">
+      <div class="text-center">
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">
+          <span class="btn-icon">🚪</span>
+          Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>🌾 Empowering Modern Agriculture Through Technology 🌾</p>
+      <small>Built for farmers, by farmers</small>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Coming Soon alerts -->
+<script>
+function showComingSoon(feature) {
+  alert('🚧 ' + feature + ' feature is coming soon!\n\nWe are working hard to bring you the best farming tools. Stay tuned for updates! 🌱');
+}
+
+// Pop-down Reminder Notification
+const reminderContainer = document.createElement('div');
+reminderContainer.id = 'reminder-notification-container';
+document.body.appendChild(reminderContainer);
+
+function showReminderNotification(reminders) {
+  reminderContainer.innerHTML = ''; // Clear previous notifications
+  if (reminders.length > 0) {
+    reminders.forEach(reminder => {
+      const notification = document.createElement('div');
+      notification.className = 'reminder-notification show';
+      notification.innerHTML = `
+        <div class="reminder-header">
+          <h3>⏰ Reminder!</h3>
+          <button class="dismiss-btn" onclick="dismissReminder(this)">×</button>
+        </div>
+        <p>${reminder[0]}</p>
+        <div class="reminder-actions">
+          <button class="btn btn-sm btn-outline-secondary" onclick="snoozeReminder(this)">Notify Later Today</button>
+        </div>
+      `;
+      reminderContainer.appendChild(notification);
+    });
+  }
+}
+
+function dismissReminder(button) {
+  button.closest('.reminder-notification').remove();
+  // In a real application, you'd send an AJAX request to mark the reminder as dismissed for the user
+}
+
+function snoozeReminder(button) {
+  const notification = button.closest('.reminder-notification');
+  notification.classList.remove('show');
+  // In a real application, you'd send an AJAX request to update the reminder's snooze time
+  // For now, we'll just hide it and it won't reappear until a page reload
+  alert('Reminder snoozed for later today.');
+}
+
+// Check for reminders on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Add some interactivity to action cards
+  const cards = document.querySelectorAll('.action-card');
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-8px) scale(1.02)';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(-5px) scale(1)';
+    });
+  });
+
+  // Fetch reminders from Flask backend (if any)
+  const reminders = {{ reminders | tojson }};
+  if (reminders && reminders.length > 0) {
+    showReminderNotification(reminders);
+  }
+});
+</script>
+
+<style>
+/* Reminder Notification Styles */
+#reminder-notification-container {
+  position: fixed;
+  top: 20px; /* Adjust as needed */
+  right: 20px;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 350px;
+}
+
+.reminder-notification {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #f5c6cb;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.reminder-notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.reminder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.reminder-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+  color: #721c24;
+}
+
+.dismiss-btn {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #721c24;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+}
+
+.dismiss-btn:hover {
+  color: #dc3545;
+}
+
+.reminder-notification p {
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+.reminder-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-outline-secondary {
+  color: #721c24;
+  border-color: #721c24;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #721c24;
+  color: white;
+}
+
+</style>
+{% endblock %}

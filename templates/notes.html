@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="content">
+    <div class="navigation-section top-left-nav">
+      <a href="{{ url_for('home') }}" class="btn btn-info back-btn">
+        <span class="btn-icon">🏠</span>
+        Back to Dashboard
+      </a>
+    </div>
+
+    <!-- Header Section -->
+    <div class="hero-section">
+      <h2>📝 Your Farm Notes</h2>
+      <p>Keep track of all your farming activities, expenses, and observations</p>
+    </div>
+
+    <!-- Create New Note Section -->
+    <div class="create-note-section">
+      <div class="action-card">
+        <h3>✨ Create New Farm Note</h3>
+        <p>Start recording your farming activities and expenses</p>
+        <form method="post" action="/create_note" id="createNoteForm">
+          <div class="input-group">
+            <input type="text" name="title" placeholder="Enter note title (e.g., Wheat Field - Season 2024)" required>
+            <button type="submit" class="btn btn-success create-btn">
+              <span class="btn-icon">➕</span>
+              Create & Open Note
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notes Display Section -->
+    <div class="notes-section">
+      {% if notes %}
+        <h3 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">📚 Your Existing Notes</h3>
+        
+        <div class="notes-grid">
+          {% for note in notes %}
+            <div class="note-card" data-note-id="{{ note[0] }}">
+              <div class="note-header">
+                <div class="note-icon">📋</div>
+                <div class="note-info">
+                  <h4 class="note-title">{{ note[2] }}</h4>
+                  <p class="note-date">📅 {{ note[3] }}</p>
+                </div>
+              </div>
+              
+              <div class="note-actions">
+                <button class="btn btn-primary view-btn" onclick="openNote({{ note[0] }})">
+                  <span class="btn-icon">👁️</span>
+                  View & Edit
+                </button>
+                
+                <button class="btn btn-danger delete-btn" onclick="confirmDelete({{ note[0] }}, '{{ note[2] }}')">
+                  <span class="btn-icon">🗑️</span>
+                  Delete
+                </button>
+              </div>
+              
+              <!-- Quick Preview -->
+              <div class="note-preview" id="preview-{{ note[0] }}">
+                <small>Click "View & Edit" to see full details</small>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        
+      {% else %}
+        <!-- No Notes Message -->
+        <div class="no-notes-section">
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>No Notes Yet</h3>
+            <p>Start by creating your first farm note above</p>
+            <div class="suggestions">
+              <h4>💡 Suggested Note Types:</h4>
+              <div class="suggestion-tags">
+                <span class="tag">Crop Planning</span>
+                <span class="tag">Daily Activities</span>
+                <span class="tag">Expense Tracking</span>
+                <span class="tag">Weather Observations</span>
+                <span class="tag">Harvest Records</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Quick Stats -->
+    {% if notes %}
+      <div class="stats-section">
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <h4>{{ notes|length }}</h4>
+            <p>Total Notes</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-info">
+            <h4>Active</h4>
+            <p>Tracking</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">🌱</div>
+          <div class="stat-info">
+            <h4>Growing</h4>
+            <p>Records</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Back to Dashboard -->
+    <div class="navigation-section">
+      <a href="{{ url_for('home') }}" class="btn btn-info back-btn">
+        <span class="btn-icon">🏠</span>
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Styles for Notes Page -->
+<style>
+/* Create Note Section */
+.create-note-section {
+  margin-bottom: 40px;
+}
+
+.input-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.input-group input {
+  flex: 1;
+  min-width: 300px;
+  margin: 0;
+}
+
+.create-btn {
+  white-space: nowrap;
+  min-width: 180px;
+}
+
+/* Notes Grid */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+/* Note Cards */
+.note-card {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.note-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border-color: #3498db;
+}
+
+.note-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.note-icon {
+  font-size: 2.5em;
+  margin-right: 15px;
+  opacity: 0.7;
+}
+
+.note-info {
+  flex: 1;
+}
+
+.note-title {
+  font-size: 1.3em;
+  color: #2c3e50;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.note-date {
+  color: #7f8c8d;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.note-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.view-btn, .delete-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 15px;
+  font-size: 14px;
+}
+
+.note-preview {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  color: #6c757d;
+  border-left: 4px solid #dee2e6;
+}
+
+/* No Notes Section */
+.no-notes-section {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4em;
+  opacity: 0.5;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 1.8em;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.empty-state p {
+  color: #7f8c8d;
+  font-size: 1.1em;
+  margin-bottom: 30px;
+}
+
+.suggestions h4 {
+  color: #34495e;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.suggestion-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tag {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Stats Section */
+.stats-section {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 40px 0;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #4a7c59, #27ae60);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 120px;
+  box-shadow: 0 8px 25px rgba(74, 124, 89, 0.3);
+}
+
+.stat-icon {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+.stat-info h4 {
+  font-size: 1.5em;
+  margin-bottom: 5px;
+  color: white;
+}
+
+.stat-info p {
+  font-size: 0.9em;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Navigation */
+.navigation-section {
+  text-align: center;
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 2px solid #e9ecef;
+}
+
+.top-left-nav {
+  text-align: left;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  margin-bottom: 20px;
+}
+
+.top-left-nav .back-btn {
+  font-size: 14px;
+  padding: 8px 15px;
+}
+
+.back-btn {
+  font-size: 16px;
+  padding: 12px 30px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .notes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .input-group input {
+    min-width: unset;
+  }
+  
+  .note-actions {
+    flex-direction: column;
+  }
+  
+  .stats-section {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+</style>
+
+<!-- JavaScript for Interactions -->
+<script>
+// Open note function
+function openNote(noteId) {
+  window.location.href = '/note/' + noteId;
+}
+
+// Confirm delete function
+function confirmDelete(noteId, noteTitle) {
+  const confirmed = confirm(
+    '🗑️ Delete Note?\n\n' +
+    'Are you sure you want to delete:\n"' + noteTitle + '"\n\n' +
+    '⚠️ This action cannot be undone!\nAll entries in this note will be permanently deleted.'
+  );
+  
+  if (confirmed) {
+    window.location.href = '/delete_note/' + noteId;
+  }
+}
+
+// Auto-redirect to new note after creation
+document.getElementById('createNoteForm').addEventListener('submit', function(e) {
+  // Show loading state
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Creating...';
+  submitBtn.disabled = true;
+  
+  // The form will submit normally, but we'll let Flask handle the redirect
+  // Flask backend should be modified to redirect to the newly created note
+});
+
+// Add click to open functionality for note cards
+document.addEventListener('DOMContentLoaded', function() {
+  const noteCards = document.querySelectorAll('.note-card');
+  noteCards.forEach(card => {
+    card.addEventListener('click', function(e) {
+      // Don't trigger if clicking on buttons
+      if (!e.target.closest('.note-actions')) {
+        const noteId = this.dataset.noteId;
+        openNote(noteId);
+      }
+    });
+  });
+  
+  // Add hover effects
+  noteCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-8px)';
+      this.style.cursor = 'pointer';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(-5px)';
+    });
+  });
+});
+</script>
+{% endblock %}

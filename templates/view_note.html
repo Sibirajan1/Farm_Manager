@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="top-left-nav">
+      <a href="{{ url_for('notes') }}" class="btn btn-info back-btn">
+        <span class="btn-icon">🔙</span>
+        Back to Notes
+      </a>
+    </div>
+<h2>{{ title }}</h2>
+<form id="entryForm" method="post" action="{{ url_for('view_note', note_id=note_id) }}" style="margin:0;">
+  <table border="1">
+    <tr>
+      <td>
+        <div class="date-inputs">
+          <select name="day" required>
+            {% for d in range(1, 32) %}
+              <option value="{{ d }}" {% if d == current_day %}selected{% endif %}>{{ d }}</option>
+            {% endfor %}
+          </select>
+          <select name="month" required>
+            {% set months = ['January','February','March','April','May','June','July','August','September','October','November','December'] %}
+            {% for m in months %}
+              <option value="{{ loop.index }}" {% if loop.index == current_month %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+          <select name="year" required>
+            {% for y in range(current_year-5, current_year+6) %}
+              <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </td>
+      <td>
+        <input type="text" name="topic" placeholder="Topic" required>
+      </td>
+      <td style="width: 30%;">
+        <input type="text" name="desc" placeholder="Description" style="width: 100%; box-sizing: border-box;">
+      </td>
+      <td style="width: 15%;">
+        <input type="number" step="0.01" name="price" placeholder="Amount" required class="price-input" style="width: 100%; box-sizing: border-box;">
+      </td>
+    </tr>
+  </table>
+  <button type="submit">Add Entry</button>
+</form>
+
+<div class="table-container">
+  <div class="table-header">
+    <button id="deleteToggle" class="delete-toggle-btn">Delete</button>
+    <button id="cancelDelete" class="cancel-delete-btn" style="display:none;">Cancel</button>
+    <button id="confirmDelete" class="confirm-delete-btn" style="display:none;">Delete Selected</button>
+  </div>
+  
+  <form id="bulkDeleteForm" method="post" action="{{ url_for('bulk_delete_entries', note_id=note_id) }}">
+    <table border="1" id="entriesTable">
+      <tr style="background-color:#f0f0f0;">
+        <th class="checkbox-column" style="display:none;">
+          <input type="checkbox" id="selectAll">
+        </th>
+        <th>S.No</th>
+        <th>Date</th>
+        <th>Topic</th>
+        <th style="width: 30%;">Description</th>
+        <th style="width: 15%;">Price</th>
+      </tr>
+      {% for entry in entries %}
+      <tr class="entry-row">
+        <td class="checkbox-column" style="display:none;">
+          <input type="checkbox" name="entry_ids" value="{{ entry[0] }}" class="entry-checkbox">
+        </td>
+        <td>{{ loop.index }}</td>
+        <td>{{ entry[2] }}</td>
+        <td>{{ entry[3] }}</td>
+        <td>{{ entry[4] }}</td>
+        <td>₹<span class="highlight-price">{{ entry[5] }}</span></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </form>
+</div>
+
+<h3 style="font-size: 15px;">Total: <span class="total-price-display">₹{{ total }}</span></h3>
+
+
+<style>
+.table-container {
+  position: relative;
+  margin: 20px 0;
+}
+
+.top-left-nav {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.top-left-nav .back-btn {
+  font-size: 14px;
+  padding: 8px 15px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.delete-toggle-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.delete-toggle-btn:hover {
+  background: #c82333;
+}
+
+.cancel-delete-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancel-delete-btn:hover {
+  background: #5a6268;
+}
+
+.confirm-delete-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 5px; /* Adds space between the selects */
+}
+
+select[name="day"],
+select[name="month"],
+select[name="year"] {
+  flex-grow: 1; /* Allows selects to take equal width */
+  padding: 5px;
+  /* Removed margin-right and width: auto */
+}
+
+.price-input {
+  width: 100%; /* Changed from 100px to 100% */
+  box-sizing: border-box;
+}
+
+.confirm-delete-btn:hover {
+  background: #c82333;
+}
+
+.checkbox-column {
+  width: 40px;
+  text-align: center;
+}
+
+.entry-checkbox, #selectAll {
+  cursor: pointer;
+}
+
+#entriesTable tr.selected {
+  background-color: #fff3cd !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const deleteToggle = document.getElementById('deleteToggle');
+  const cancelDelete = document.getElementById('cancelDelete');
+  const confirmDelete = document.getElementById('confirmDelete');
+  const checkboxColumns = document.querySelectorAll('.checkbox-column');
+  const selectAll = document.getElementById('selectAll');
+  const entryCheckboxes = document.querySelectorAll('.entry-checkbox');
+  const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+  
+  let deleteMode = false;
+  
+  // Toggle delete mode
+  deleteToggle.addEventListener('click', function() {
+    deleteMode = true;
+    
+    // Show checkboxes and control buttons
+    checkboxColumns.forEach(col => col.style.display = 'table-cell');
+    deleteToggle.style.display = 'none';
+    cancelDelete.style.display = 'inline-block';
+    confirmDelete.style.display = 'inline-block';
+  });
+  
+  // Cancel delete mode
+  cancelDelete.addEventListener('click', function() {
+    deleteMode = false;
+    
+    // Hide checkboxes and reset
+    checkboxColumns.forEach(col => col.style.display = 'none');
+    deleteToggle.style.display = 'inline-block';
+    cancelDelete.style.display = 'none';
+    confirmDelete.style.display = 'none';
+    
+    // Uncheck all checkboxes
+    selectAll.checked = false;
+    entryCheckboxes.forEach(cb => {
+      cb.checked = false;
+      cb.closest('tr').classList.remove('selected');
+    });
+  });
+  
+  // Select all functionality
+  selectAll.addEventListener('change', function() {
+    entryCheckboxes.forEach(cb => {
+      cb.checked = selectAll.checked;
+      if (selectAll.checked) {
+        cb.closest('tr').classList.add('selected');
+      } else {
+        cb.closest('tr').classList.remove('selected');
+      }
+    });
+  });
+  
+  // Individual checkbox functionality
+  entryCheckboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+      if (cb.checked) {
+        cb.closest('tr').classList.add('selected');
+      } else {
+        cb.closest('tr').classList.remove('selected');
+      }
+      
+      // Update select all checkbox
+      const checkedBoxes = document.querySelectorAll('.entry-checkbox:checked');
+      selectAll.checked = checkedBoxes.length === entryCheckboxes.length;
+    });
+  });
+  
+  // Confirm delete functionality
+  confirmDelete.addEventListener('click', function() {
+    const checkedBoxes = document.querySelectorAll('.entry-checkbox:checked');
+    
+    if (checkedBoxes.length === 0) {
+      alert('Please select at least one entry to delete.');
+      return;
+    }
+    
+    const confirmMessage = `Are you sure you want to delete ${checkedBoxes.length} selected entries? This action cannot be undone.`;
+    
+    if (confirm(confirmMessage)) {
+      // Submit the form
+      bulkDeleteForm.submit();
+    }
+  });
+});
+</script>
+{% endblock %}

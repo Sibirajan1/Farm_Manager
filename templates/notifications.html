@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="content">
+    <div class="notification-box">
+      <div class="notification-header">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary back-home">🏠 Back to Home</a>
+        <h2>🔔 Your Notifications</h2>
+      </div>
+
+      <hr class="divider">
+
+      <div class="notification-list-container">
+        <ul id="notification-page-list">
+          {% if notifications %}
+            {% for notif in notifications %}
+              <li class="notification-item {% if not notif.is_read %}unread{% endif %}">
+                <span class="notification-type-icon">
+                  {% if notif.type == 'weather' %}🌦️
+                  {% elif notif.type == 'alert' %}🚨
+                  {% elif notif.type == 'farming' %}🌾
+                  {% elif notif.type == 'scheme' %}📢
+                  {% else %}💬
+                  {% endif %}
+                </span>
+                <div class="notification-content">
+                  <div class="notification-message">{{ notif.message }}</div>
+                  <div class="notification-time">{{ notif.created_at }}</div>
+                </div>
+              </li>
+            {% endfor %}
+          {% else %}
+            <!-- Temporary demo notifications -->
+            <li class="notification-item unread">
+              <span class="notification-type-icon">🌦️</span>
+              <div class="notification-content">
+                <div class="notification-message">Weather Update: Moderate rainfall expected tomorrow. Plan irrigation accordingly.</div>
+                <div class="notification-time">Today, 10:15 AM</div>
+              </div>
+            </li>
+            <li class="notification-item unread">
+              <span class="notification-type-icon">🌾</span>
+              <div class="notification-content">
+                <div class="notification-message">Farming Tip: Use organic compost for paddy this week for better soil health.</div>
+                <div class="notification-time">Today, 8:30 AM</div>
+              </div>
+            </li>
+            <li class="notification-item">
+              <span class="notification-type-icon">📢</span>
+              <div class="notification-content">
+                <div class="notification-message">New Scheme: Apply for “Smart Irrigation Support 2025” by Oct 15.</div>
+                <div class="notification-time">Yesterday, 5:00 PM</div>
+              </div>
+            </li>
+            <li class="notification-item">
+              <span class="notification-type-icon">🚨</span>
+              <div class="notification-content">
+                <div class="notification-message">Alert: Locust activity detected in nearby district. Stay updated with field inspections.</div>
+                <div class="notification-time">2 days ago</div>
+              </div>
+            </li>
+            <li class="notification-item">
+              <span class="notification-type-icon">💧</span>
+              <div class="notification-content">
+                <div class="notification-message">Reminder: Your water pump maintenance is due this weekend.</div>
+                <div class="notification-time">3 days ago</div>
+              </div>
+            </li>
+          {% endif %}
+        </ul>
+
+        <div class="bulk-actions">
+          <button id="mark-all-read-btn-page" class="btn btn-primary">Mark All as Read</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  body {
+    background: linear-gradient(135deg, #dfe9f3, #ffffff, #c8e6c9);
+    font-family: "Poppins", sans-serif;
+  }
+
+  .notification-box {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin: 50px auto;
+    max-width: 650px;
+    position: relative;
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .notification-header h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .divider {
+    border: none;
+    height: 3px;
+    margin: 15px 0 25px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #64b5f6, #81c784, #ba68c8);
+  }
+
+  .back-home {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #1976d2;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+  }
+
+  .back-home:hover {
+    background: #0d47a1;
+  }
+
+  #notification-page-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .notification-item {
+    background: #f9fafc;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+
+  .notification-item.unread {
+    background: #e3f2fd;
+  }
+
+  .notification-item:hover {
+    transform: translateY(-3px);
+    background: #f0f7ff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .notification-type-icon {
+    font-size: 1.8em;
+    margin-right: 12px;
+  }
+
+  .notification-content {
+    flex-grow: 1;
+  }
+
+  .notification-message {
+    font-size: 1em;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .notification-time {
+    font-size: 0.85em;
+    color: #777;
+  }
+
+  .bulk-actions {
+    text-align: center;
+    margin-top: 25px;
+  }
+
+  .btn-primary {
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.95em;
+    transition: all 0.3s;
+  }
+
+  .btn-primary:hover {
+    background: #0d47a1;
+  }
+</style>
+{% endblock %}
