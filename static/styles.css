@@ -1,0 +1,549 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f0fff0 0%, #e0ffe0 100%); /* Lighter green, earthy tones */
+    min-height: 100vh;
+    padding: 20px;
+    color: #003300; /* Dark green for better contrast */
+    line-height: 1.6;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Background decorative elements */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="%23ffffff" opacity="0.05"/><circle cx="75" cy="75" r="1.5" fill="%23ffffff" opacity="0.03"/><circle cx="50" cy="10" r="1" fill="%23ffffff" opacity="0.04"/><circle cx="90" cy="40" r="1.5" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Floating shapes */
+.floating-shape {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    animation: float 6s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 80px;
+    height: 80px;
+    background: rgba(74, 124, 89, 0.1);
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 60px;
+    height: 60px;
+    background: rgba(52, 152, 219, 0.1);
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.shape-3 {
+    width: 100px;
+    height: 100px;
+    background: rgba(155, 89, 182, 0.08);
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Container for content */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(15px);
+    overflow: hidden;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    padding: 3px;
+    background: linear-gradient(135deg, #87ceeb, #a2d9a2, #c39bd3); /* Lighter blue, green, purple */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: exclude;
+    z-index: -1;
+}
+
+/* Header styles */
+h1, h2, h3 {
+    color: #004d00; /* Darker green for headings */
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 2.8em;
+    background: none; /* Remove gradient background */
+    -webkit-background-clip: unset; /* Unset webkit properties */
+    -webkit-text-fill-color: #004d00; /* Darker green for text */
+    background-clip: unset; /* Unset background clip */
+    color: #004d00; /* Darker green for fallback */
+    padding: 30px 0 20px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+h2 {
+    font-size: 2.2em;
+    color: #2e8b57; /* Sea green */
+    padding: 25px 0;
+    border-bottom: 4px solid;
+    border-image: linear-gradient(90deg, #87ceeb, #a2d9a2, #c39bd3) 1; /* Lighter blue, green, purple */
+    margin-bottom: 30px;
+    position: relative;
+}
+
+/* Content wrapper */
+.content {
+    padding: 50px;
+}
+
+/* Hero section */
+.hero-section {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.1), rgba(162, 217, 162, 0.1)); /* Lighter blue and green */
+    border-radius: 15px;
+    position: relative;
+}
+
+.hero-section h1 {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.hero-section p {
+    font-size: 1.3em;
+    color: #006400; /* Dark green for hero section paragraph */
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+}
+
+/* Form styles */
+form {
+    background: linear-gradient(135deg, #f0fff0, #e0ffe0); /* Very light green */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+    border: 2px solid #a3d9a3; /* Light green border */
+}
+
+/* Input styles */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+textarea, 
+select {
+    width: 100%;
+    padding: 15px 20px;
+    margin: 10px 0 20px 0;
+    border: 2px solid #8fbc8f; /* Dark sea green */
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: #f5fff5; /* Very light green */
+    color: #2e8b57; /* Sea green text */
+}
+
+input:focus, 
+textarea:focus, 
+select:focus {
+    outline: none;
+    border-color: #3cb371; /* Medium sea green */
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(60, 179, 113, 0.1);
+    transform: translateY(-2px);
+}
+
+.price-input {
+    width: 150px; /* Increased width */
+    padding: 15px 20px; /* Matched padding */
+    font-size: 16px; /* Matched font size */
+    text-align: right; /* Align text to the right */
+    border: 2px solid #8fbc8f; /* Matched border */
+    border-radius: 10px; /* Matched border-radius */
+    background: #f5fff5; /* Matched background */
+    color: #2e8b57; /* Matched text color */
+}
+
+.highlight-price {
+    color: #e67e22; /* Orange color for highlighting */
+    font-weight: bold;
+    font-size: 1.1em; /* Slightly bigger font size */
+}
+
+.total-price-display {
+    font-size: 1.8em; /* Significantly bigger font size */
+    font-weight: bold;
+    color: #004d00; /* Darker green color */
+    padding: 8px 15px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #e0ffe0, #f0fff0); /* Light green gradient background */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    display: inline-block; /* To apply padding and shadow correctly */
+}
+
+.total-price-display:hover {
+    transform: translateY(-3px) scale(1.02); /* Interactive effect on hover */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+    background: linear-gradient(135deg, #d4edda, #cce5ff); /* Different gradient on hover */
+}
+
+/* Button styles */
+button, 
+.btn {
+    display: inline-block;
+    padding: 15px 35px;
+    margin: 10px 8px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    min-width: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button hover effect */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+/* Primary button */
+.btn-primary, 
+button[type="submit"] {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-primary:hover, 
+button[type="submit"]:hover {
+    background: linear-gradient(135deg, #2980b9, #1f4e79);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+}
+
+/* Success button */
+.btn-success {
+    background: linear-gradient(135deg, #4a7c59, #27ae60);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #27ae60, #1e8449);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(74, 124, 89, 0.4);
+}
+
+/* Warning button */
+.btn-warning {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4);
+}
+
+/* Info button */
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #138496, #0f6674);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(23, 162, 184, 0.4);
+}
+
+/* Purple button */
+.btn-purple {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+}
+
+.btn-purple:hover {
+    background: linear-gradient(135deg, #8e44ad, #732d91);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(155, 89, 182, 0.4);
+}
+
+/* Danger button */
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
+}
+
+/* Button group */
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+/* Main actions grid */
+.main-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin: 40px 0;
+}
+
+/* Action cards */
+.action-card {
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border-radius: 15px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 2px solid #a3d9a3;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #87ceeb, #a2d9a2, #c39bd3);
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border-color: #87ceeb; /* Lighter blue for hover */
+}
+
+.action-card h3 {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    color: #004d00; /* Darker green for action card headings */
+}
+
+.action-card p {
+    color: #006400; /* Dark green for action card paragraph */
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    margin: 25px 0;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 2px solid #a3d9a3; /* Light green border */
+}
+
+th {
+    background: linear-gradient(135deg, #2e8b57, #228b22); /* Sea green to forest green */
+    color: white;
+    padding: 20px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid #c8e6c9; /* Lighter green */
+    vertical-align: top;
+    color: #2c3e50;
+    background: #ffffff;
+}
+
+tr:nth-child(even) td {
+    background-color: #f0fff0;
+}
+
+tr:hover td {
+    background-color: #e0ffe0;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+/* Flash messages */
+.flash {
+    padding: 18px 25px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid;
+}
+
+.flash.error {
+    background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+    color: white;
+    border-left-color: #c0392b;
+}
+
+.flash.success {
+    background: linear-gradient(135deg, #51cf66, #27ae60);
+    color: white;
+    border-left-color: #229954;
+}
+
+.flash.info {
+    background: linear-gradient(135deg, #74c0fc, #3498db);
+    color: white;
+    border-left-color: #2980b9;
+}
+
+.flash.warning {
+    background: linear-gradient(135deg, #ffd93d, #f39c12);
+    color: #2c3e50;
+    border-left-color: #e67e22;
+}
+
+/* Navigation styles */
+.nav-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 2px solid #c8e6c9;
+}
+
+/* Footer styles */
+.footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #f0fff0, #e0ffe0);
+    border-radius: 15px;
+    color: #004d00; /* Darker green for footer text */
+    font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
+    .content {
+        padding: 30px 25px;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.2em;
+    }
+    
+    .main-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+        margin: 8px 0;
+    }
+}
+
+/* Icon styles */
+.btn-icon {
+    font-size: 1.2em;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+/* Utility classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.mt-3 { margin-top: 30px; }
+.mb-3 { margin-bottom: 30px; }
+
+/* Specific style for "Back to Notes" button */
+.btn-back-to-notes {
+    background: linear-gradient(135deg, #0056b3, #003d80); /* Darker blue */
+    color: white;
+    font-family: 'Georgia', serif; /* Different font style */
+    padding: 12px 25px;
+    font-size: 15px;
+}
+
+.btn-back-to-notes:hover {
+    background: linear-gradient(135deg, #003d80, #00264d);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 86, 179, 0.4);
+}
