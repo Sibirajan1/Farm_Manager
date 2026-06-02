@@ -261,4 +261,4 @@ def set_reminder():
     return render_template('reminders.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
