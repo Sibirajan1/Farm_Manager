@@ -1,21 +1,30 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+import os
 import sqlite3
 from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Database setup
-conn = sqlite3.connect('notes.db')
-c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, code TEXT)''')
-c.execute('''CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, user_id INTEGER, title TEXT, date TEXT)''')
-c.execute('''CREATE TABLE IF NOT EXISTS note_entries (id INTEGER PRIMARY KEY, note_id INTEGER, date TEXT, topic TEXT, description TEXT, price REAL)''')
-c.execute('''CREATE TABLE IF NOT EXISTS reminders (id INTEGER PRIMARY KEY, user_id INTEGER, topic TEXT, reminder_date TEXT, created_at TEXT)''')
-c.execute('''CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY, user_id INTEGER, message TEXT, type TEXT, created_at TEXT, is_read INTEGER DEFAULT 0)''')
-conn.commit()
-conn.close()
+# Vercel uses /tmp for writable storage
+DB_PATH = "/tmp/notes.db" if os.environ.get("VERCEL") else "notes.db"
 
+def get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, code TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, user_id INTEGER, title TEXT, date TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS note_entries (id INTEGER PRIMARY KEY, note_id INTEGER, date TEXT, topic TEXT, description TEXT, price REAL)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS reminders (id INTEGER PRIMARY KEY, user_id INTEGER, topic TEXT, reminder_date TEXT, created_at TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY, user_id INTEGER, message TEXT, type TEXT, created_at TEXT, is_read INTEGER DEFAULT 0)''')
+    conn.commit()
+    conn.close()
+init_db()
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -24,7 +33,7 @@ def index():
 def login():
     if request.method == 'POST':
         code = request.form['code']
-        conn = sqlite3.connect('notes.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute('SELECT * FROM users WHERE code=?', (code,))
         user = c.fetchone()
@@ -36,7 +45,7 @@ def login():
     return render_template('login.html')
 
 def add_notification(user_id, message, notification_type):
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     c.execute('INSERT INTO notifications (user_id, message, type, created_at) VALUES (?, ?, ?, ?)',
@@ -49,17 +58,18 @@ def register():
     if request.method == 'POST':
         name = request.form['name']
         code = request.form['code']
-        conn = sqlite3.connect('notes.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute('INSERT INTO users (name, code) VALUES (?, ?)', (name, code))
+        user_id = c.lastrowid
         conn.commit()
         conn.close()
         flash("Account created. Login now.")
-        add_notification(c.lastrowid, "Welcome to Farm Manager! Your account has been successfully created.", "alert")
-        add_notification(c.lastrowid, "Don't forget to check the weather forecast for optimal planting conditions today!", "weather")
-        add_notification(c.lastrowid, "Reminder: Your irrigation system needs maintenance next week.", "farming")
-        add_notification(c.lastrowid, "New research indicates advanced fertilizers can boost your yield by 15% this season!", "farming")
-        add_notification(c.lastrowid, "Government announces new agricultural subsidies. Check details on our schemes page!", "alert")
+        add_notification(user_id, "Welcome to Farm Manager! Your account has been successfully created.", "alert")
+        add_notification(user_id, "Don't forget to check the weather forecast for optimal planting conditions today!", "weather")
+        add_notification(user_id, "Reminder: Your irrigation system needs maintenance next week.", "farming")
+        add_notification(user_id, "New research indicates advanced fertilizers can boost your yield by 15% this season!", "farming")
+        add_notification(user_id, "Government announces new agricultural subsidies. Check details on our schemes page!", "alert")
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -67,7 +77,7 @@ def register():
 def home():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     today = datetime.now().strftime("%Y-%m-%d")
     c.execute('SELECT topic FROM reminders WHERE user_id=? AND reminder_date=?', (session['user_id'], today))
@@ -81,7 +91,7 @@ def get_notifications():
         return redirect(url_for('login'))
     
     user_id = session['user_id']
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('SELECT id, message, type, created_at, is_read FROM notifications WHERE user_id=? ORDER BY created_at DESC', (user_id,))
     notifications = c.fetchall()
@@ -106,7 +116,7 @@ def notifications_page():
         return redirect(url_for('login'))
     
     user_id = session['user_id']
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('SELECT id, message, type, created_at, is_read FROM notifications WHERE user_id=? ORDER BY created_at DESC', (user_id,))
     notifications = c.fetchall()
@@ -129,7 +139,7 @@ def mark_notification_read(notification_id):
     if 'user_id' not in session:
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?', (notification_id, session['user_id']))
     conn.commit()
@@ -143,7 +153,7 @@ def mark_all_notifications_read():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
     user_id = session['user_id']
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('UPDATE notifications SET is_read=1 WHERE user_id=?', (user_id,))
     conn.commit()
@@ -155,7 +165,7 @@ def mark_all_notifications_read():
 def notes():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM notes WHERE user_id=?', (session['user_id'],))
     notes = c.fetchall()
@@ -166,7 +176,7 @@ def notes():
 def create_note():
     title = request.form['title']
     date = datetime.now().strftime("%A, %d %B %Y")
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('INSERT INTO notes (user_id, title, date) VALUES (?, ?, ?)', (session['user_id'], title, date))
     
@@ -183,7 +193,7 @@ def create_note():
 @app.route('/note/<int:note_id>', methods=['GET', 'POST'])
 def view_note(note_id):
     now = datetime.now()
-    conn = sqlite3.connect('notes.db')
+    conn = get_db_connection()
     c = conn.cursor()
     if request.method == 'POST':
         if 'day' in request.form and 'month' in request.form and 'year' in request.form:
@@ -221,7 +231,7 @@ def view_note(note_id):
 def bulk_delete_entries(note_id):
     entry_ids = request.form.getlist('entry_ids')
     if entry_ids:
-        conn = sqlite3.connect('notes.db')
+        conn = get_db_connection()
         c = conn.cursor()
         # Delete multiple entries at once
         placeholders = ','.join('?' * len(entry_ids))
@@ -248,7 +258,7 @@ def set_reminder():
         reminder_date_str = request.form['reminder_date']
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        conn = sqlite3.connect('notes.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute('INSERT INTO reminders (user_id, topic, reminder_date, created_at) VALUES (?, ?, ?, ?)',
                   (session['user_id'], topic, reminder_date_str, created_at))
